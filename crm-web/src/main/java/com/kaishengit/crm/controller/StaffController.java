@@ -3,12 +3,10 @@ package com.kaishengit.crm.controller;
 import com.github.pagehelper.PageInfo;
 import com.kaishengit.crm.controller.exception.ForbidException;
 import com.kaishengit.crm.controller.exception.NotFoundException;
-import com.kaishengit.crm.entity.Customer;
-import com.kaishengit.crm.entity.Progress;
-import com.kaishengit.crm.entity.Record;
-import com.kaishengit.crm.entity.Staff;
+import com.kaishengit.crm.entity.*;
 import com.kaishengit.crm.exception.ServiceException;
 import com.kaishengit.crm.service.StaffService;
+import com.kaishengit.crm.service.TaskService;
 import com.kaishengit.result.AjaxResult;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -29,6 +27,8 @@ public class StaffController extends BaseController {
 
     @Autowired
     private StaffService staffService;
+    @Autowired
+    private TaskService taskService;
 
     @GetMapping("/set")
     public String staffSet() {
@@ -128,6 +128,10 @@ public class StaffController extends BaseController {
         //跟进记录列表
         List<Progress> followRecord = staffService.findFollowRecordBySaleId(id);
 
+        //待办事项列表
+        List<Task> taskList = taskService.findAllTaskByRecordId(id);
+
+        model.addAttribute("taskList",taskList);
         model.addAttribute("followRecord",followRecord);
         model.addAttribute("progressList",staffService.findAllProgress());
         model.addAttribute("record",record);

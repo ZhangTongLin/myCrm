@@ -91,7 +91,7 @@
                 title : {
                     required : true
                 },
-                finishTime : {
+                finish : {
                     required : true
                 }
             },
@@ -99,7 +99,7 @@
                 title : {
                     required : "请输入任务内容"
                 },
-                finishTime : {
+                finish : {
                     required : "请选择完成时间"
                 }
             }

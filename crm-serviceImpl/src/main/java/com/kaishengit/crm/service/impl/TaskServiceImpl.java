@@ -2,10 +2,21 @@ package com.kaishengit.crm.service.impl;
 
 import com.kaishengit.crm.entity.Task;
 import com.kaishengit.crm.example.TaskExample;
+import com.kaishengit.crm.exception.ServiceException;
 import com.kaishengit.crm.mapper.TaskMapper;
 import com.kaishengit.crm.service.TaskService;
+import com.kaishengit.crm.jobs.SendMassageJob;
+import org.apache.commons.lang3.StringUtils;
+import org.joda.time.DateTime;
+import org.joda.time.format.DateTimeFormat;
+import org.joda.time.format.DateTimeFormatter;
+import org.quartz.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.quartz.SchedulerFactoryBean;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -31,12 +42,17 @@ public class  TaskServiceImpl implements TaskService {
 
     @Autowired
     private TaskMapper taskMapper;
+    @Autowired
+    SchedulerFactoryBean schedulerFactoryBean;
+
+    private Logger logger = LoggerFactory.getLogger(TaskServiceImpl.class);
 
     /**
      * 添加一个新的待办事项
      * @param params
      */
     @Override
+    @Transactional(rollbackFor = RuntimeException.class)
     public void addTask(Map<String, Object> params){
 
 
@@ -68,10 +84,57 @@ public class  TaskServiceImpl implements TaskService {
             }
 
         } catch (ParseException e) {
-            e.printStackTrace();
+            throw new ServiceException(e.getMessage());
         }
 
         taskMapper.insertSelective(task);
+
+        logger.info("添加了新的任务 {}",task.getTitle());
+
+        //添加新的调度任务
+
+        if (StringUtils.isNotEmpty((String)params.get("remind"))) {
+
+            JobDataMap jobDataMap = new JobDataMap();
+            jobDataMap.putAsString("staffId",task.getStaffId());
+            jobDataMap.put("message",task.getTitle());
+
+            JobDetail jobDetail = JobBuilder
+                    .newJob(SendMassageJob.class)
+                    .withIdentity("taskId"+task.getId(),"sendMessage")
+                    .setJobData(jobDataMap)
+                    .build();
+
+            DateTimeFormatter dateTimeFormatter = DateTimeFormat.forPattern("yyyy-MM-dd HH:mm");
+            DateTime dateTime = dateTimeFormatter.parseDateTime((String)params.get("remind"));
+
+            StringBuilder cronExpression = new StringBuilder("0")
+                    .append(" ")
+                    .append(dateTime.getMinuteOfHour())
+                    .append(" ")
+                    .append(dateTime.getHourOfDay())
+                    .append(" ")
+                    .append(dateTime.getDayOfMonth())
+                    .append(" ")
+                    .append(dateTime.getMonthOfYear())
+                    .append(" ? ")
+                    .append(dateTime.getYear());
+
+            ScheduleBuilder scheduleBuilder = CronScheduleBuilder
+                    .cronSchedule(cronExpression.toString());
+            Trigger cronTrigger = TriggerBuilder.newTrigger()
+                    .withSchedule(scheduleBuilder).build();
+
+            Scheduler scheduler = schedulerFactoryBean.getScheduler();
+            try {
+                scheduler.scheduleJob(jobDetail,cronTrigger);
+                scheduler.start();
+            } catch (SchedulerException e) {
+                throw new ServiceException("添加定时任务异常");
+            }
+
+
+        }
 
     }
 
@@ -86,7 +149,89 @@ public class  TaskServiceImpl implements TaskService {
 
         TaskExample taskExample = new TaskExample();
         taskExample.createCriteria().andStaffIdEqualTo(id);
+        taskExample.setOrderByClause("finish_time desc");
+        return taskMapper.selectByExample(taskExample);
+    }
 
+    /**
+     * 根据id删除对应的待办事项
+     *
+     * @param id
+     */
+    @Override
+    @Transactional(rollbackFor = RuntimeException.class)
+    public void deleteTaskById(Integer id) {
+
+        Task task = findTaskById(id);
+        deleteTimedTask(id, task);
+        taskMapper.deleteByPrimaryKey(id);
+
+    }
+
+    /**
+     * 删除定时任务
+     * @param id
+     * @param task
+     */
+    private void deleteTimedTask(Integer id, Task task) {
+        Scheduler scheduler = schedulerFactoryBean.getScheduler();
+        if (task.getRemindTime() != null && !task.getRemindTime().equals("")) {
+            try {
+                scheduler.deleteJob(new JobKey("taskId" +id,"sendMessage"));
+            } catch (SchedulerException e) {
+                throw new ServiceException("删除定时任务异常");
+            }
+        }
+    }
+
+    /**
+     * 根据id查询对应的待办事项
+     *
+     * @param id
+     * @return
+     */
+    @Override
+    public Task findTaskById(Integer id) {
+        return taskMapper.selectByPrimaryKey(id);
+    }
+
+    /**
+     * 更改当前待办事项的状态
+     *
+     * @param id
+     */
+    @Override
+    @Transactional(rollbackFor =RuntimeException.class )
+    public void updateTask(Integer id) {
+        Task task = findTaskById(id);
+        task.setDone(DONE);
+        deleteTimedTask(id,task);
+        taskMapper.updateByPrimaryKeySelective(task);
+    }
+
+    /**
+     * 根据销售机会的id 查询对应的待办事项
+     *
+     * @param id
+     * @return
+     */
+    @Override
+    public List<Task> findAllTaskByRecordId(Integer id) {
+        TaskExample taskExample = new TaskExample();
+        taskExample.createCriteria().andRecordIdEqualTo(id);
+        return taskMapper.selectByExample(taskExample);
+    }
+
+    /**
+     * 根据顾客的id查询对应的待办事项
+     *
+     * @param id
+     * @return
+     */
+    @Override
+    public List<Task> findAllTaskByCustomerId(Integer id) {
+        TaskExample taskExample = new TaskExample();
+        taskExample.createCriteria().andCustIdEqualTo(id);
         return taskMapper.selectByExample(taskExample);
     }
 }

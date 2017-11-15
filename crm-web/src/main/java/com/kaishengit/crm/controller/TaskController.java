@@ -1,15 +1,14 @@
 package com.kaishengit.crm.controller;
 
+import com.kaishengit.crm.controller.exception.ForbidException;
+import com.kaishengit.crm.controller.exception.NotFoundException;
 import com.kaishengit.crm.entity.Staff;
 import com.kaishengit.crm.entity.Task;
 import com.kaishengit.crm.service.TaskService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import javax.servlet.http.HttpSession;
@@ -54,6 +53,17 @@ public class TaskController extends BaseController {
         return "/staff/task/new";
     }
 
+    /**
+     * 新添加一个待办事项
+     * @param title
+     * @param finish
+     * @param remind
+     * @param redirectAttributes
+     * @param session
+     * @param recordId
+     * @param custId
+     * @return
+     */
     @PostMapping("/new")
     public String addTask(String title,
                           String finish,
@@ -77,6 +87,47 @@ public class TaskController extends BaseController {
 
         redirectAttributes.addFlashAttribute("message","添加成功");
         return "redirect:/task/wait";
+    }
+
+    @GetMapping("/{id:\\d+}/delete")
+    public String deleteTask(@PathVariable Integer id,
+                             RedirectAttributes redirectAttributes,
+                             HttpSession session) {
+
+        checkRole(id, session);
+
+        taskService.deleteTaskById(id);
+        redirectAttributes.addFlashAttribute("message","删除成功");
+
+        return "redirect:/task/wait";
+
+    }
+
+    @GetMapping("/{id:\\d+}/done")
+    public String updateTaskDone(@PathVariable Integer id,
+                                 HttpSession session) {
+
+        checkRole(id,session);
+        taskService.updateTask(id);
+        return "redirect:/task/wait";
+    }
+    /**
+     * 权限验证
+     * @param id
+     * @param session
+     */
+    private void checkRole(@PathVariable Integer id, HttpSession session) {
+        Task task = taskService.findTaskById(id);
+
+        Staff staff = getCurrentAccount(session);
+
+        if (task == null) {
+            throw new NotFoundException();
+        }
+
+        if (!task.getStaffId().equals(staff.getId())) {
+            throw new ForbidException();
+        }
     }
 
 }

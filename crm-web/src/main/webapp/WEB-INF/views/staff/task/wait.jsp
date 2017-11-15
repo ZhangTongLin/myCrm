@@ -46,7 +46,7 @@
                     <ul class="todo-list">
                         <c:forEach items="${taskList}" var="task">
                             <li class="${task.done == 1 ? 'done' : ''}">
-                                <input type="checkbox" ${task.done==1 ? 'checked' : ''} value="${task.id}">
+                                <input class="task_checkbox" type="checkbox" ${task.done==1 ? 'checked' : ''} value="${task.id}">
                                 <span class="text">${task.title}</span>
                                 <small class="label ${task.overdue ? 'label-success':'label-danger'}"><i class="fa fa-clock-o"></i><fmt:formatDate value="${task.finishTime}" pattern="yyyy年MM月dd日"/></small>
                                 <div class="tools">
@@ -55,27 +55,6 @@
                                 </div>
                             </li>
                         </c:forEach>
-                        <li class="done">
-                            <input type="checkbox">
-                            <span class="text">给张三打电话联系</span>
-                            <a href=""><i class="fa fa-user-o"></i> 张三</a>
-                            <small class="label label-danger"><i class="fa fa-clock-o"></i> 7月15日</small>
-                            <div class="tools">
-                                <i class="fa fa-edit"></i>
-                                <i class="fa fa-trash-o"></i>
-                            </div>
-                        </li>
-                        <li>
-                            <input type="checkbox">
-                            <span class="text">给张三打电话联系</span>
-                            <a href=""><i class="fa fa-money"></i> 9号楼23#</a>
-                            <small class="label label-danger"><i class="fa fa-clock-o"></i> 8月3日</small>
-                            <div class="tools">
-                                <i class="fa fa-edit"></i>
-                                <i class="fa fa-trash-o"></i>
-                            </div>
-                        </li>
-
                     </ul>
                 </div>
                 <!-- /.box-body -->
@@ -90,13 +69,27 @@
 </div>
 <!-- ./wrapper -->
 <%@include file="../../include/js.jsp"%>
+<script src="/static/plugins/layer/layer.js"></script>
 
 <script>
+    //删除
     $(function () {
        $(".deleteTask").click(function () {
            var id = $(this).attr("rel");
-           alert(id);
-       })
+           layer.confirm("确定要删除吗？",function () {
+                window.location.href="/task/" + id +"/delete";
+           });
+       });
+       $(".task_checkbox").click(function () {
+           var id = $(this).val();
+           var checked = $(this)[0].checked;
+           layer.confirm("确定将该事项标记为已做吗？",function () {
+               if (checked) {
+                   window.location.href="/task/"+id+"/done";
+               }
+           });
+
+       });
     });
 </script>
 </body>

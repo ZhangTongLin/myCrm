@@ -9,6 +9,9 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <title>凯盛软件CRM-客户资料</title>
    <%@include file="../include/css.jsp"%>
+    <link rel="stylesheet" href="/static/dist/css/skins/_all-skins.min.css">
+    <link rel="stylesheet" href="/static/plugins/datetimepicker/css/bootstrap-datetimepicker.min.css">
+    <link rel="stylesheet" href="/static/plugins/datepicker/datepicker3.css">
     <style>
         .td_title {
             font-weight: bold;
@@ -98,10 +101,16 @@
                     <div class="col-md-4">
                         <div class="box">
                             <div class="box-header with-border">
-                                <h3 class="box-title">日程安排</h3>
+                                <h3 class="box-title">日程安排
+                                    <small><button id="addTaskBtn" class="btn btn-success btn-xs"><i class="fa fa-plus"></i></button></small>
+                                </h3>
                             </div>
                             <div class="box-body">
-
+                                <c:forEach items="${taskList}" var="task">
+                                    <li class="list-group-item">
+                                        <a href="/task/wait" target="_blank">${task.title}</a>
+                                    </li>
+                                </c:forEach>
                             </div>
                         </div>
                         <div class="box">
@@ -115,6 +124,40 @@
                     </div>
                 </div>
             </div>
+
+            <div class="modal fade" id="addTaskModal">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span></button>
+                            <h4 class="modal-title">新增待办事项</h4>
+                        </div>
+                        <div class="modal-body">
+                            <form method="post" action="/task/new" id="addTaskForm">
+                                <input name="staffId" value="${sessionScope.curr_account.id}" type="hidden">
+                                <input type="hidden" name="custId" value="${customer.id}">
+                                <div class="form-group">
+                                    <label>任务名称</label>
+                                    <input name="title" type="text" class="form-control">
+                                </div>
+                                <div class="form-group">
+                                    <label>完成日期</label>
+                                    <input name="finish" type="text" class="form-control" id="datepicker">
+                                </div>
+                                <div class="form-group">
+                                    <label>提醒时间</label>
+                                    <input name="remind" type="text" class="form-control" id="datepicker2">
+                                </div>
+                            </form>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-default" data-dismiss="modal">取消</button>
+                            <button type="button" class="btn btn-primary" id="addTask">添加</button>
+                        </div>
+                    </div><!-- /.modal-content -->
+                </div><!-- /.modal-dialog -->
+            </div><!-- /.modal -->
+
         </section>
         <!-- /.content -->
 
@@ -126,6 +169,12 @@
 <!-- ./wrapper -->
 <%@include file="../include/js.jsp"%>
 <script src="/static/plugins/layer/layer.js"></script>
+<script src="/static/plugins/validate/jquery.validate.min.js"></script>
+<script src="/static/plugins/datetimepicker/js/bootstrap-datetimepicker.min.js"></script>
+<script src="/static/plugins/datetimepicker/js/locales/bootstrap-datetimepicker.zh-CN.js"></script>
+<script src="/static/plugins/moment/moment.js"></script>
+<script src="/static/plugins/datepicker/bootstrap-datepicker.js"></script>
+<script src="/static/plugins/datepicker/locales/bootstrap-datepicker.zh-CN.js"></script>
 
 <script>
 
@@ -137,6 +186,59 @@
                 layer.close(index);
                 window.location.href="/customer/my/"+ customerId +"/delete";
             })
+        });
+
+        //添加待办事项
+        $("#addTaskBtn").click(function () {
+            $("#addTaskModal").modal({
+                show : true,
+                backdrop : 'static'
+            });
+        });
+
+        $("#addTask").click(function () {
+            $("#addTaskForm").submit();
+        });
+
+        $("#addTaskForm").validate({
+            errorClass : "text-danger",
+            errorElement : "span",
+            rules : {
+                title : {
+                    required : true
+                },
+                finish : {
+                    required : true
+                }
+            },
+            messages : {
+                title : {
+                    required : "请输入任务内容"
+                },
+                finish : {
+                    required : "请选择完成时间"
+                }
+            }
+        });
+
+        //日历的插件
+        var picker = $('#datepicker').datepicker({
+            format: "yyyy-mm-dd",
+            language: "zh-CN",
+            autoclose: true,
+            todayHighlight: true,
+            startDate:moment().format("yyyy-MM-dd")
+        });
+        picker.on("changeDate",function (e) {
+            var today = moment().format("YYYY-MM-DD");
+            $('#datepicker2').datetimepicker('setStartDate',today);
+            $('#datepicker2').datetimepicker('setEndDate', e.format('yyyy-mm-dd'));
+        });
+        var timepicker = $('#datepicker2').datetimepicker({
+            format: "yyyy-mm-dd hh:ii",
+            language: "zh-CN",
+            autoclose: true,
+            todayHighlight: true
         });
 
     });

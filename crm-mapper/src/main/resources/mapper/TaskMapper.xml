@@ -113,7 +113,7 @@
       #{recordId,jdbcType=INTEGER}, #{staffId,jdbcType=INTEGER}, #{createTime,jdbcType=TIMESTAMP}
       )
   </insert>
-  <insert id="insertSelective" parameterType="com.kaishengit.crm.entity.Task">
+  <insert id="insertSelective" parameterType="com.kaishengit.crm.entity.Task" useGeneratedKeys="true" keyProperty="id">
     insert into task
     <trim prefix="(" suffix=")" suffixOverrides=",">
       <if test="id != null">

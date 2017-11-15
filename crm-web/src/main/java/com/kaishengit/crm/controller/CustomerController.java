@@ -6,8 +6,10 @@ import com.kaishengit.crm.controller.exception.NotFoundException;
 import com.kaishengit.crm.entity.Customer;
 import com.kaishengit.crm.entity.Record;
 import com.kaishengit.crm.entity.Staff;
+import com.kaishengit.crm.entity.Task;
 import com.kaishengit.crm.exception.ServiceException;
 import com.kaishengit.crm.service.CustomerService;
+import com.kaishengit.crm.service.TaskService;
 import com.kaishengit.result.AjaxResult;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -30,6 +32,8 @@ public class CustomerController extends BaseController {
 
     @Autowired
     private CustomerService customerService;
+    @Autowired
+    private TaskService taskService;
 
     /**
      * 查找我的客户
@@ -115,8 +119,14 @@ public class CustomerController extends BaseController {
 
         Customer customer = checkRole(id, session);
 
+        //销售机会列表
         List<Record> recordList = customerService.findAllRecord(customer.getId());
 
+        //待办事项列表
+
+        List<Task> taskList = taskService.findAllTaskByCustomerId(id);
+
+        model.addAttribute("taskList",taskList);
         model.addAttribute("recordList",recordList);
         model.addAttribute("customer",customer);
 
