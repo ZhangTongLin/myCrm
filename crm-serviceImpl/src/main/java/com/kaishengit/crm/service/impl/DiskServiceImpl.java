@@ -3,12 +3,14 @@ package com.kaishengit.crm.service.impl;
 import com.kaishengit.crm.entity.Disk;
 import com.kaishengit.crm.example.DiskExample;
 import com.kaishengit.crm.exception.ServiceException;
+import com.kaishengit.crm.files.FileStore;
 import com.kaishengit.crm.mapper.DiskMapper;
 import com.kaishengit.crm.service.DiskService;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -28,6 +30,10 @@ public class DiskServiceImpl implements DiskService {
 
     @Autowired
     private DiskMapper diskMapper;
+
+    @Autowired
+    @Qualifier("fastFileStore")
+    private FileStore fileStore;
 
     @Value("${uploadFile.path}")
     private String filePath;
@@ -103,16 +109,10 @@ public class DiskServiceImpl implements DiskService {
 
         disk.setFileSize(FileUtils.byteCountToDisplaySize(fileSize));
 
-        String newFileName = UUID.randomUUID() + fileName.substring(fileName.lastIndexOf("."));
-        disk.setSaveName(newFileName);
-
         try {
 
-            FileOutputStream fileOutputStream = new FileOutputStream(new File(filePath,newFileName));
-            IOUtils.copy(inputStream,fileOutputStream);
-            fileOutputStream.flush();
-            fileOutputStream.close();
-            inputStream.close();
+            String newFileName = fileStore.saveFile(inputStream,fileName);
+            disk.setSaveName(newFileName);
 
         } catch (IOException e) {
             throw new ServiceException("上传到磁盘异常",e);
@@ -120,5 +120,31 @@ public class DiskServiceImpl implements DiskService {
 
         diskMapper.insertSelective(disk);
 
+    }
+
+    /**
+     * 根据id获得对应文件的输入流
+     *
+     * @param id 文件的id
+     * @return 对应 的输入流
+     */
+    @Override
+    @Transactional(rollbackFor = RuntimeException.class)
+    public InputStream downloadFileById(Integer id) throws IOException {
+
+        Disk disk = diskMapper.selectByPrimaryKey(id);
+        System.out.println("saveName>>>>>>>>>>>" + disk.getSaveName());
+
+        if (disk == null || disk.getType().equals(Disk.DISK_TYPE_FOLDER)) {
+            throw new ServiceException("文件已经被删除或者不存在");
+        }
+
+        disk.setDonwloadTime(disk.getDonwloadTime() + 1);
+        diskMapper.updateByPrimaryKeyWithBLOBs(disk);
+
+        byte[] bytes = fileStore.downloadFile(disk.getSaveName());
+        InputStream inputStream = new ByteArrayInputStream(bytes);
+
+        return inputStream;
     }
 }

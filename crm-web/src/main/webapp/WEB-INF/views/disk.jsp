@@ -78,6 +78,21 @@
 
           <table class="table table-hover">
             <tbody id="dataTable">
+            <c:if test="${disk.type == 'file'}">
+                <tr>
+                    <td colspan="4">
+                        <c:choose>
+                            <c:when test="${disk.name.endsWith('.pdf') or disk.name.endsWith('.jpg') or disk.name.endsWith('.png') or disk.name.endsWith('.bmp') or disk.name.endsWith('.gif') or disk.name.endsWith('.txt')}">
+                                <a href="/disk/download?id=${disk.id}" target="_blank" class="btn btn-sm btn-info"><i class="fa fa-search"></i> 在线预览</a>
+                                <a href="/disk/download?id=${disk.id}&fileName=${disk.name}" class="btn btn-sm btn-danger"><i class="fa fa-download"></i> 下载</a>
+                            </c:when>
+                            <c:otherwise>
+                                <a href="/disk/download?id=${disk.id}&fileName=${disk.name}" class="btn btn-sm btn-danger"><i class="fa fa-download"></i> 下载</a>
+                            </c:otherwise>
+                        </c:choose>
+                    </td>
+                </tr>
+            </c:if>
               <c:if test="${empty diskList}">
                 <tr><td colspan="4">暂无内容</td></tr>
               </c:if>

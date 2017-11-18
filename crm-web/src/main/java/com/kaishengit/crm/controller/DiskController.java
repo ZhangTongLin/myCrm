@@ -4,14 +4,18 @@ import com.kaishengit.crm.controller.exception.NotFoundException;
 import com.kaishengit.crm.entity.Disk;
 import com.kaishengit.crm.service.DiskService;
 import com.kaishengit.result.AjaxResult;
+import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.List;
 
 /**
@@ -96,5 +100,30 @@ public class DiskController {
 
     }
 
+    @GetMapping("/download")
+    public void downloadFile(Integer id,
+                             HttpServletResponse response,
+                             @RequestParam(required = false) String fileName) {
 
+        try {
+            OutputStream outputStream = response.getOutputStream();
+            InputStream inputStream = diskService.downloadFileById(id);
+
+            if (StringUtils.isNotEmpty(fileName)) {
+                //设置下载的MIMEtype
+                response.setContentType("application/octet-stream");
+                fileName = new String(fileName.getBytes("UTF-8"),"ISO8859-1");
+                //弹出下载对话框
+                response.addHeader("Content-Disposition","attachment; filename=\""+fileName+"\"");
+            }
+
+            IOUtils.copy(inputStream,outputStream);
+            inputStream.close();
+            outputStream.flush();
+            outputStream.close();
+
+        } catch (IOException e) {
+            throw new NotFoundException(e,"文件没有找到");
+        }
+    }
 }

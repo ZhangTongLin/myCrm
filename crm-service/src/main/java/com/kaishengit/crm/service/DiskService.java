@@ -2,6 +2,8 @@ package com.kaishengit.crm.service;
 
 import com.kaishengit.crm.entity.Disk;
 
+import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
 
@@ -41,4 +43,11 @@ public interface DiskService {
      * @param fileName 文件原有的名称
      */
     void uploadFile(Integer pId, Integer staffId, InputStream inputStream, Long fileSize, String fileName);
+
+    /**
+     * 根据id获得对应文件的输入流
+     * @param id 文件的id
+     * @return 对应 的输入流
+     */
+    InputStream downloadFileById(Integer id) throws IOException;
 }

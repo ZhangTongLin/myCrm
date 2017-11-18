@@ -21,7 +21,7 @@ public class FastDFSTest {
     public void uploadTest() throws IOException, MyException {
 
         Properties properties = new Properties();
-        properties.setProperty(ClientGlobal.PROP_KEY_TRACKER_SERVERS,"192.168.169.88:22122,192.168.169.89:22122");
+        properties.setProperty(ClientGlobal.PROP_KEY_TRACKER_SERVERS,"192.168.169.88:22122");
 
         //初始化配置
         ClientGlobal.initByProperties(properties);
