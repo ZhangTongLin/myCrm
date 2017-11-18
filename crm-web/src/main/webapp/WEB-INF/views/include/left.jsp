@@ -66,9 +66,7 @@
                     <li><a href="../../index2.html"><i class="fa fa-circle-o"></i> 逾期事项</a></li>
                 </ul>
             </li>
-
-
-            <li><a href="../../documentation/index.html"><i class="fa fa-share-alt"></i> <span>公司网盘</span></a></li>
+            <li class="${param.menu == 'disk' ? 'active':''}"><a href="/disk"><i class="fa fa-share-alt"></i> <span>公司网盘</span></a></li>
             <li class="header">系统管理</li>
             <!-- 部门员工管理 -->
             <li class="${param.menu == 'admin'?'active':''}"><a href="/admin/staffManage"><i class="fa fa-users"></i> <span>员工管理</span></a></li>

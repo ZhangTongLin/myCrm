@@ -114,4 +114,10 @@ public interface StaffService {
      * @param id
      */
     void deleteRecordById(Integer id);
+
+    /**
+     * 查询所有的用户
+     * @return
+     */
+    List<Staff> findAllStaff();
 }

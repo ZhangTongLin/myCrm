@@ -158,6 +158,31 @@
                 </div><!-- /.modal-dialog -->
             </div><!-- /.modal -->
 
+            <%--用户选择对话框（转交他人）--%>
+            <div class="modal fade" id="chooseUserModel">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span></button>
+                            <h4 class="modal-title">请选择转入账号</h4>
+                        </div>
+                        <div class="modal-body">
+                            <select id="userSelect" class="form-control">
+                                <c:forEach items="${staffList}" var="staff">
+                                    <c:if test="${staff.id != customer.staffId}">
+                                        <option value="${staff.id}">${staff.userName} (${staff.phoneNum})</option>
+                                    </c:if>
+                                </c:forEach>
+                            </select>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-default" data-dismiss="modal">取消</button>
+                            <button type="button" class="btn btn-primary" id="saveTranBtn">确定</button>
+                        </div>
+                    </div><!-- /.modal-content -->
+                </div><!-- /.modal-dialog -->
+            </div><!-- /.modal -->
+
         </section>
         <!-- /.content -->
 
@@ -178,6 +203,16 @@
 
 <script>
 
+    //转交他人
+    $("#tranCustomer").click(function () {
+       $("#chooseUserModel").modal({
+           show : true,
+           backdrop : 'static'
+       });
+    });
+
+
+    //删除
     $(function () {
         var customerId = ${customer.id};
         $("#deleteBtn").click(function () {

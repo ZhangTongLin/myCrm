@@ -34,7 +34,7 @@
                     </div>
                 </div>
                 <div class="box-body">
-                    <form method="post" id="editCustomerForm">
+                    <form method="post" action="/customer/my/edit" id="editCustomerForm">
                         <input type="hidden" name="id" value="${customer.id}">
                         <div class="form-group">
                             <label>姓名</label>

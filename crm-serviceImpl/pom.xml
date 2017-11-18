@@ -91,6 +91,12 @@
             <artifactId>joda-time</artifactId>
             <version>2.9.6</version>
         </dependency>
+        <!--添加fastDFS依赖-->
+        <dependency>
+            <groupId>org.csource</groupId>
+            <artifactId>fastdfs-client-java</artifactId>
+            <version>1.27-SNAPSHOT</version>
+        </dependency>
     </dependencies>
 
     <build>

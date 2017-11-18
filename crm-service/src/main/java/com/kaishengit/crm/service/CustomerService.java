@@ -16,7 +16,7 @@ import java.util.List;
  */
 public interface CustomerService {
     /**
-     * 查看当前账号的客户
+     * 查看当前账号的客户,并进行分页
      *
      * @param pageNo 页码
      * @param id 当前账号的id
@@ -89,4 +89,5 @@ public interface CustomerService {
      * @param customer
      */
     void editCustomer(Customer customer);
+
 }

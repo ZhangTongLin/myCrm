@@ -9,6 +9,7 @@ import com.kaishengit.crm.entity.Staff;
 import com.kaishengit.crm.entity.Task;
 import com.kaishengit.crm.exception.ServiceException;
 import com.kaishengit.crm.service.CustomerService;
+import com.kaishengit.crm.service.StaffService;
 import com.kaishengit.crm.service.TaskService;
 import com.kaishengit.result.AjaxResult;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,6 +22,7 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.util.HashMap;
 import java.util.List;
 
 /**
@@ -34,6 +36,8 @@ public class CustomerController extends BaseController {
     private CustomerService customerService;
     @Autowired
     private TaskService taskService;
+    @Autowired
+    private StaffService staffService;
 
     /**
      * 查找我的客户
@@ -123,9 +127,12 @@ public class CustomerController extends BaseController {
         List<Record> recordList = customerService.findAllRecord(customer.getId());
 
         //待办事项列表
-
         List<Task> taskList = taskService.findAllTaskByCustomerId(id);
 
+        //所有用户的列表
+        List<Staff> staffList = staffService.findAllStaff();
+
+        model.addAttribute("staffList",staffList);
         model.addAttribute("taskList",taskList);
         model.addAttribute("recordList",recordList);
         model.addAttribute("customer",customer);
@@ -243,11 +250,15 @@ public class CustomerController extends BaseController {
 
     }
 
-    @PostMapping("/my/{id:\\d+}/edit")
+    /**
+     * 更新客户信息
+     * @param customer
+     * @return
+     */
+    @PostMapping("/my/edit")
     public String editMyCustomer(Customer customer) {
 
         customerService.editCustomer(customer);
-        return "redirect:www";
+        return "redirect:/customer/my/show/"+ customer.getId();
     }
-
 }

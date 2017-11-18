@@ -322,4 +322,14 @@ public class StaffServiceImpl implements StaffService {
         }
         customerMapper.updateByPrimaryKeySelective(customer);
     }
+
+    /**
+     * 查询所有的用户
+     *
+     * @return
+     */
+    @Override
+    public List<Staff> findAllStaff() {
+        return staffMapper.selectByExample(new StaffExample());
+    }
 }
