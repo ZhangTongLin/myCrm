@@ -332,4 +332,12 @@ public class StaffServiceImpl implements StaffService {
     public List<Staff> findAllStaff() {
         return staffMapper.selectByExample(new StaffExample());
     }
+
+    /**
+     * @return 客户的销售的统计集合
+     */
+    @Override
+    public List<Map<String, Object>> customerChart() {
+        return staffMapper.forCustomerChart();
+    }
 }

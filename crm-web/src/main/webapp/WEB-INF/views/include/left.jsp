@@ -54,17 +54,10 @@
                 </a>
             </li>
             <!-- 统计报表 -->
-            <li class="treeview">
-                <a href="#">
+            <li class="treeview ${param.menu == 'chart' ? 'active' : ''}">
+                <a href="/chart">
                     <i class="fa fa-pie-chart"></i> <span>统计报表</span>
-                    <span class="pull-right-container">
-              <i class="fa fa-angle-left pull-right"></i>
-            </span>
                 </a>
-                <ul class="treeview-menu">
-                    <li><a href=""><i class="fa fa-circle-o"></i> 待办列表</a></li>
-                    <li><a href="../../index2.html"><i class="fa fa-circle-o"></i> 逾期事项</a></li>
-                </ul>
             </li>
             <li class="${param.menu == 'disk' ? 'active':''}"><a href="/disk"><i class="fa fa-share-alt"></i> <span>公司网盘</span></a></li>
             <li class="header">系统管理</li>

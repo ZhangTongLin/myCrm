@@ -120,4 +120,10 @@ public interface StaffService {
      * @return
      */
     List<Staff> findAllStaff();
+
+    /**
+     *获取客户的销售统计
+     * @return 客户的销售的统计集合
+     */
+    List<Map<String,Object>> customerChart();
 }

@@ -224,7 +224,16 @@
           dept_id = #{deptId}
     </if>
   </select>
-  <update id="updateByExampleSelective" parameterType="map">
+    <select id="forCustomerChart" resultType="java.util.Map">
+      SELECT
+        progress,
+        count(*) AS 'counts'
+    FROM
+        record
+    GROUP BY
+        progress
+    </select>
+    <update id="updateByExampleSelective" parameterType="map">
     update staff
     <set>
       <if test="record.id != null">

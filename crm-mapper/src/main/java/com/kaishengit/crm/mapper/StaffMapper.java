@@ -35,4 +35,6 @@ public interface StaffMapper {
     List<Staff> findStaffByParamWithDept(Map<String, Object> params);
 
     Long countByDeptId(@Param("deptId") Integer deptId);
+
+    List<Map<String,Object>> forCustomerChart();
 }
