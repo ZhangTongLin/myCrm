@@ -8,6 +8,7 @@ import com.kaishengit.crm.exception.ServiceException;
 import com.kaishengit.crm.exception.VerifyException;
 import com.kaishengit.crm.mapper.*;
 import com.kaishengit.crm.service.StaffService;
+import com.kaishengit.weixin.WeixinUtil;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -17,6 +18,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -37,6 +39,8 @@ public class StaffServiceImpl implements StaffService {
     private CustomerMapper customerMapper;
     @Autowired
     private ProgressMapper progressMapper;
+    @Autowired
+    private WeixinUtil weixinUtil;
     @Value("${salt}")
     private String salt;
     @Value("#{'${record.progress}'.split(',')}")
@@ -112,7 +116,8 @@ public class StaffServiceImpl implements StaffService {
      * @throws ServiceException 如果添加失败抛出异常ServiceException
      */
     @Override
-    public void addStaff(String userName, Integer phoneNum, String password, Integer[] deptIds) throws ServiceException {
+    @Transactional(rollbackFor = RuntimeException.class)
+    public void addStaff(String userName, String phoneNum, String password, Integer[] deptIds) throws ServiceException {
 
         Staff staff = new Staff();
         StaffExample staffExample = new StaffExample();
@@ -139,6 +144,9 @@ public class StaffServiceImpl implements StaffService {
             deptStaffKey.setDeptId(deptIds[i]);
             deptStaffMapper.insertSelective(deptStaffKey);
         }
+        //同步到企业微信中
+        weixinUtil.addMember(staff.getId(),userName, Arrays.asList(deptIds),phoneNum);
+
         logger.info("{} 添加了新账号 {}", new Date(), userName);
     }
 
@@ -148,6 +156,7 @@ public class StaffServiceImpl implements StaffService {
      * @param id 员工的id
      */
     @Override
+    @Transactional(rollbackFor = RuntimeException.class)
     public void deleteStaffById(Integer id) throws ServiceException {
 
         DeptStaffExample deptStaffExample = new DeptStaffExample();
@@ -155,6 +164,10 @@ public class StaffServiceImpl implements StaffService {
         deptStaffMapper.deleteByExample(deptStaffExample);
 
         staffMapper.deleteByPrimaryKey(id);
+
+        //同步删除企业微信中的员工
+        weixinUtil.deleteMember(id);
+
     }
 
     /**

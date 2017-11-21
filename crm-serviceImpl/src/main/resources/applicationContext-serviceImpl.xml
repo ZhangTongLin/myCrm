@@ -8,6 +8,7 @@
     <context:component-scan base-package="com.kaishengit.crm">
         <context:exclude-filter type="annotation" expression="org.springframework.stereotype.Controller"/>
     </context:component-scan>
-    <context:property-placeholder location="classpath:config.properties"/>
+
+    <context:property-placeholder location="classpath*:config*.properties"/>
 
 </beans>

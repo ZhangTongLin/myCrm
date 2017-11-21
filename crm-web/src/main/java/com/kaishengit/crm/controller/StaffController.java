@@ -46,7 +46,7 @@ public class StaffController extends BaseController {
      */
     @PostMapping("/new")
     @ResponseBody
-    public AjaxResult addStaff(String userName,Integer phoneNum,
+    public AjaxResult addStaff(String userName,String phoneNum,
                                String password,Integer[] deptId) {
 
         try {

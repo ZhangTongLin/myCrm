@@ -1,9 +1,13 @@
 package com.kaishengit.crm.entity;
 
+import java.io.Serializable;
 import java.util.Date;
 import java.util.List;
 
-public class Staff {
+/**
+ * @author 
+ */
+public class Staff implements Serializable {
     private Integer id;
 
     private String userName;
@@ -14,7 +18,10 @@ public class Staff {
 
     private Date updateTime;
 
-    private Integer phoneNum;
+    /**
+     * 手机号
+     */
+    private String phoneNum;
 
     private List<Department> deptList;
 
@@ -25,6 +32,8 @@ public class Staff {
     public void setDeptList(List<Department> deptList) {
         this.deptList = deptList;
     }
+
+    private static final long serialVersionUID = 1L;
 
     public Integer getId() {
         return id;
@@ -66,11 +75,11 @@ public class Staff {
         this.updateTime = updateTime;
     }
 
-    public Integer getPhoneNum() {
+    public String getPhoneNum() {
         return phoneNum;
     }
 
-    public void setPhoneNum(Integer phoneNum) {
+    public void setPhoneNum(String phoneNum) {
         this.phoneNum = phoneNum;
     }
 }

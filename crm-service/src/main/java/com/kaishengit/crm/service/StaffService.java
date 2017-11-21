@@ -47,7 +47,7 @@ public interface StaffService {
      * @param deptIds
      * @throws ServiceException 如果添加失败抛出异常ServiceException
      */
-    void addStaff(String userName, Integer phoneNum, String password, Integer[] deptIds) throws ServiceException;
+    void addStaff(String userName, String phoneNum, String password, Integer[] deptIds) throws ServiceException;
 
     /**
      * 根据id 删除员工信息

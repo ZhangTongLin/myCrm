@@ -10,10 +10,12 @@ import com.kaishengit.crm.mapper.AdminMapper;
 import com.kaishengit.crm.mapper.DepartmentMapper;
 import com.kaishengit.crm.mapper.StaffMapper;
 import com.kaishengit.crm.service.AdminService;
+import com.kaishengit.weixin.WeixinUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Date;
 import java.util.List;
@@ -24,12 +26,11 @@ import java.util.List;
 @Service
 public class AdminServiceImpl implements AdminService {
 
-    @Autowired
-    private AdminMapper adminMapper;
-    @Autowired
-    private StaffMapper staffMapper;
+
     @Autowired
     private DepartmentMapper departmentMapper;
+    @Autowired
+    private WeixinUtil weixinUtil;
 
     private Logger logger = LoggerFactory.getLogger(AdminServiceImpl.class);
     /**
@@ -53,6 +54,7 @@ public class AdminServiceImpl implements AdminService {
      * @throws ServiceException 如果失败了则抛出异常
      */
     @Override
+    @Transactional(rollbackFor = RuntimeException.class)
     public void saveDept(String deptName) throws ServiceException {
 
         DepartmentExample departmentExample = new DepartmentExample();
@@ -73,6 +75,8 @@ public class AdminServiceImpl implements AdminService {
         department.setpId(PARENT_ID);
 
         departmentMapper.insertSelective(department);
+        //同步到企业微信中
+        weixinUtil.addDepartMent(deptName,department.getId(),PARENT_ID);
 
         logger.info("{} 添加了新的部门 {}",new Date(),deptName);
     }
