@@ -203,6 +203,8 @@
 
 <script>
 
+    var customerId = ${customer.id};
+
     //转交他人
     $("#tranCustomer").click(function () {
        $("#chooseUserModel").modal({
@@ -210,13 +212,20 @@
            backdrop : 'static'
        });
     });
+    $("#saveTranBtn").click(function () {
+        var toStaffId = $("#userSelect").val();
+        var toStaffMessage = $("#userSelect option:selected").text();
+        layer.confirm("确定要转交给" + toStaffMessage + "吗？",function (index) {
+            layer.close(index);
+            window.location.href="/customer/my/" + customerId + "/tran/"+toStaffId;
+        });
+    });
 
 
     //删除
     $(function () {
-        var customerId = ${customer.id};
-        $("#deleteBtn").click(function () {
 
+        $("#deleteBtn").click(function () {
             layer.confirm("确定要删除吗？",function (index) {
                 layer.close(index);
                 window.location.href="/customer/my/"+ customerId +"/delete";

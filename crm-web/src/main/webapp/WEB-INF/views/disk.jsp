@@ -120,10 +120,18 @@
                       <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown">
                         <i class="fa fa-ellipsis-h"></i>
                       </button>
-                      <ul class="dropdown-menu">
-                        <li><a href="">打开</a></li>
-                        <li><a href="#">重命名</a></li>
-                        <li><a href="#">删除</a></li>
+                      <ul id="handle" class="dropdown-menu">
+                          <c:choose>
+                              <c:when test="${disk.type == 'file'}">
+                                  <li><a href="/disk/download?id=${disk.id}&fileName=${disk.name}">下载</a></li>
+                                  <li><a href="/disk/download?id=${disk.id}" target="_blank">在线预览</a></li>
+                              </c:when>
+                              <c:otherwise>
+                                  <li><a href="/disk?id=${disk.id}">打开</a></li>
+                              </c:otherwise>
+                          </c:choose>
+                        <li value="重命名"><a>重命名</a></li>
+                        <li value="删除"><a>删除</a></li>
                       </ul>
                     </div>
                   </td>
@@ -297,6 +305,21 @@
           var id = $(this).attr("rel");
           window.location.href="/disk?id="+id;
       });
+
+      //删除文件
+      
+//      $("#handle").change(function () {
+//          var value = $("#handle").val();
+//          alert(value);
+//          if (value == "删除") {
+//              alert(123)
+//          }
+//      })
+//      $(".test").click(function () {
+//         layer.confirm("确定要删除吗",function () {
+//
+//         });
+//      });
   });
 </script>
 </body>

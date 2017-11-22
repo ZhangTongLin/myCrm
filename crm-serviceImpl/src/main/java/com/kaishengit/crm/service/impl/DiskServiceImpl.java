@@ -32,7 +32,7 @@ public class DiskServiceImpl implements DiskService {
     private DiskMapper diskMapper;
 
     @Autowired
-    @Qualifier("qiniuStore")
+    @Qualifier("diskFileStore")
     private FileStore fileStore;
 
     @Value("${uploadFile.path}")
@@ -133,7 +133,6 @@ public class DiskServiceImpl implements DiskService {
     public InputStream downloadFileById(Integer id) throws IOException {
 
         Disk disk = diskMapper.selectByPrimaryKey(id);
-        System.out.println("saveName>>>>>>>>>>>" + disk.getSaveName());
 
         if (disk == null || disk.getType().equals(Disk.DISK_TYPE_FOLDER)) {
             throw new ServiceException("文件已经被删除或者不存在");

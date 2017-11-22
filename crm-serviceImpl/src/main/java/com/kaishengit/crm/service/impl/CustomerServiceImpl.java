@@ -11,6 +11,7 @@ import com.kaishengit.crm.exception.ServiceException;
 import com.kaishengit.crm.mapper.CustomerMapper;
 import com.kaishengit.crm.mapper.ProgressMapper;
 import com.kaishengit.crm.mapper.RecordMapper;
+import com.kaishengit.crm.mapper.StaffMapper;
 import com.kaishengit.crm.service.CustomerService;
 import org.apache.commons.io.IOUtils;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
@@ -23,9 +24,11 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.io.IOException;
 import java.io.OutputStream;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -41,7 +44,8 @@ public class CustomerServiceImpl implements CustomerService {
     @Autowired
     private RecordMapper recordMapper;
     @Autowired
-    private ProgressMapper progressMapper;
+    private StaffMapper staffMapper;
+
 
     //springEL表达式
     @Value("#{'${customer.trade}'.split(',')}")
@@ -266,6 +270,32 @@ public class CustomerServiceImpl implements CustomerService {
     public void editCustomer(Customer customer) {
         customer.setUpdateTime(new Date());
         customerMapper.updateByPrimaryKeySelective(customer);
+    }
+
+    /**
+     * 转交客户
+     *  @param toStaffId
+     * @param customer
+     */
+    @Override
+    @Transactional(rollbackFor = RuntimeException.class)
+    public void tranCustomerToStaff(Integer toStaffId, Customer customer) {
+        Staff staff = staffMapper.selectByPrimaryKey(customer.getStaffId());
+
+        customer.setStaffId(toStaffId);
+        customer.setReminder(customer.getReminder() + staff.getUserName() + "，转交给过来");
+
+        customerMapper.updateByPrimaryKeySelective(customer);
+        RecordExample recordExample = new RecordExample();
+        recordExample.createCriteria().andCustIdEqualTo(customer.getId());
+        List<Record> recordList = recordMapper.selectByExample(recordExample);
+        if (!recordList.isEmpty()) {
+            for (Record record : recordList) {
+                record.setStaffId(toStaffId);
+                recordMapper.updateByPrimaryKeySelective(record);
+            }
+        }
+
     }
 
     /**

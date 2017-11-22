@@ -126,4 +126,11 @@ public interface StaffService {
      * @return 客户的销售的统计集合
      */
     List<Map<String,Object>> customerChart();
+
+    /**
+     * 根据员工的id查询员工
+     * @param toStaffId
+     * @return
+     */
+    Staff findStaffById(Integer toStaffId);
 }

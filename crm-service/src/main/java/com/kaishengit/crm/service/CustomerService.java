@@ -90,4 +90,10 @@ public interface CustomerService {
      */
     void editCustomer(Customer customer);
 
+    /**
+     * 转交客户
+     * @param toStaffId
+     * @param customer
+     */
+    void tranCustomerToStaff(Integer toStaffId, Customer customer);
 }

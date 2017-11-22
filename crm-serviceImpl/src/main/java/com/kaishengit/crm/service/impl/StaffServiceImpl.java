@@ -353,4 +353,15 @@ public class StaffServiceImpl implements StaffService {
     public List<Map<String, Object>> customerChart() {
         return staffMapper.forCustomerChart();
     }
+
+    /**
+     * 根据员工的id查询员工
+     *
+     * @param toStaffId
+     * @return
+     */
+    @Override
+    public Staff findStaffById(Integer toStaffId) {
+        return staffMapper.selectByPrimaryKey(toStaffId);
+    }
 }

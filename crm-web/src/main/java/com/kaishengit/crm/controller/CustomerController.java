@@ -261,4 +261,31 @@ public class CustomerController extends BaseController {
         customerService.editCustomer(customer);
         return "redirect:/customer/my/show/"+ customer.getId();
     }
+
+    /**
+     * 转交他人
+     * @param customerId
+     * @param toStaffId
+     * @param session
+     * @param redirectAttributes
+     * @return
+     */
+    @GetMapping("/my/{customerId:\\d+}/tran/{toStaffId:\\d+}")
+    public String tranCustomer(@PathVariable Integer customerId,
+                               @PathVariable Integer toStaffId,
+                               HttpSession session,
+                               RedirectAttributes redirectAttributes) {
+
+        Customer customer = checkRole(customerId,session);
+        Staff staff = staffService.findStaffById(toStaffId);
+        if (staff != null) {
+            customerService.tranCustomerToStaff(toStaffId,customer);
+        } else {
+            throw new NotFoundException("该用户不存在");
+        }
+
+        redirectAttributes.addFlashAttribute("message","转交成功");
+        return "redirect:/customer/my";
+
+    }
 }
