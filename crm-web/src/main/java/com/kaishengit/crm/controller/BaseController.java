@@ -1,5 +1,6 @@
 package com.kaishengit.crm.controller;
 
+import com.kaishengit.crm.auth.ShiroUtil;
 import com.kaishengit.crm.entity.Staff;
 
 import javax.servlet.http.HttpSession;
@@ -18,5 +19,9 @@ public abstract class BaseController {
     public static Staff getCurrentAccount(HttpSession session) {
         return (Staff) session.getAttribute("curr_account");
     }
+
+    public static Staff getCurrentStaff(){
+        return ShiroUtil.getStaff();
+    };
 
 }

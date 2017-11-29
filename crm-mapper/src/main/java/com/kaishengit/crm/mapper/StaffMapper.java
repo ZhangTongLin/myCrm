@@ -1,5 +1,6 @@
 package com.kaishengit.crm.mapper;
 
+import com.kaishengit.crm.entity.Department;
 import com.kaishengit.crm.entity.Staff;
 import com.kaishengit.crm.example.StaffExample;
 import org.apache.ibatis.annotations.Param;
@@ -37,4 +38,6 @@ public interface StaffMapper {
     Long countByDeptId(@Param("deptId") Integer deptId);
 
     List<Map<String,Object>> forCustomerChart();
+
+    List<Department> findAllDeptByStaffId(@Param("staffId") Integer id);
 }

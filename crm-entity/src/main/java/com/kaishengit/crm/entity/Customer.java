@@ -7,6 +7,10 @@ import java.util.Date;
  * @author 
  */
 public class Customer implements Serializable {
+    /**
+     * 公共客户对应的员工id为0
+     */
+    public static final Integer PUBLIC_CUSTOMER_STAFFID = 0;
     private Integer id;
 
     /**

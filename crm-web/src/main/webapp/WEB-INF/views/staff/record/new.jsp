@@ -31,7 +31,7 @@
             <!-- Default box -->
             <div class="box">
                 <div class="box-header with-border">
-                    <h3 class="box-title">我的销售机会</h3>
+                    <h3 class="box-title">新增销售机会</h3>
 
                     <div class="box-tools pull-right">
                         <a href="/staff/my/record" type="button" class="btn btn-primary">返回列表</a>

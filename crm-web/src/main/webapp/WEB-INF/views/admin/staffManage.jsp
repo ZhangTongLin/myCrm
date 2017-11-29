@@ -18,15 +18,14 @@
 
     <!-- 右侧内容部分 -->
     <div class="content-wrapper">
-
         <!-- Main content -->
         <section class="content">
-
             <div class="row">
                 <div class="col-md-2">
                     <div class="box">
                         <div class="box-body">
                             <button id="addDept" class="btn btn-default">添加部门</button>
+                            <a href="javascript:;" id="deleteDeptBtn" class="btn btn-danger btn-sm"><i class="fa fa-trash-o"></i> 删除部门</a>
                             <input type="hidden" id="deptId">
                             <ul id="ztree" class="ztree"></ul>
                         </div>
@@ -39,7 +38,8 @@
                             <h3 class="box-title">员工管理</h3>
                             <div class="box-tools pull-right">
                                 <button type="button" id="addStaff" class="btn btn-box-tool"  title="Collapse">
-                                    <i class="fa fa-plus" ></i> 添加员工</button>
+                                    <i class="fa fa-plus" ></i> 添加员工
+                                </button>
                             </div>
                         </div>
                         <div class="box-body">
@@ -66,8 +66,6 @@
         <!-- /.content -->
     </div>
     <!-- /.content-wrapper -->
-
-
     <%--添加账号模态框--%>
     <!-- Modal -->
     <div class="modal fade" id="addStaffModel" >
@@ -170,7 +168,7 @@
         });
 
 
-
+        //添加员工
         $("#addStaff").click(function () {
             $("#checkboxList").html("");
             $.get("/admin/dept.json").done(function (data) {
@@ -245,6 +243,7 @@
         })
 
 
+        //删除员工
         $(document).delegate(".delStaffLink","click" , function () {
 
             var id =  $(this).attr("rel");
@@ -265,10 +264,18 @@
             });
         });
 
+        //删除部门
+        $("#deleteDeptBtn").click(function () {
+            layer.confirm("确定要删除吗？",function () {
+                $.get("/admin/dept/delete").done(function (json) {
 
+                }).error(function () {
+                    layer.msg(json.message);
+                });
+            });
+        });
 
-
-
+        //添加部门
         $("#addDept").click(function () {
             layer.prompt({title : "添加部门"},function (text,index) {
                 layer.close(index);

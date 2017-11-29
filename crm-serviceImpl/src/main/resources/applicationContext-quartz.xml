@@ -40,6 +40,7 @@
     <!--定义调度器-->
 
     <bean id="scheduler" class="org.springframework.scheduling.quartz.SchedulerFactoryBean" >
+        <property name="applicationContextSchedulerContextKey" value="applicationContext"/>
         <!--创建数据库连接-->
         <property name="dataSource" ref="dataSource"/>
         <!--事务管理-->

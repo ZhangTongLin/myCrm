@@ -55,4 +55,22 @@ public interface TaskService {
      * @return
      */
     List<Task> findAllTaskByCustomerId(Integer id);
+
+    /**
+     * 更新待办事项
+     * @param params
+     */
+    void editTask(Map<String, Object> params);
+
+    /**
+     * 根据客户id删除对应的待办事项
+     * @param id
+     */
+    void deleteTaskByCustomerId(Integer id);
+
+    /**
+     * 根据销售机会id删除对应的待办事项
+     * @param id
+     */
+    void deleteTaskByRecordId(Integer id);
 }

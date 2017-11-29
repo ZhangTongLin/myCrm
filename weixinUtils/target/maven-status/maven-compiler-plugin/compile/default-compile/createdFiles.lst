@@ -1,3 +1,4 @@
 com\kaishengit\weixin\exception\WeixinException.class
 com\kaishengit\weixin\WeixinUtil.class
 com\kaishengit\weixin\WeixinUtil$1.class
+com\kaishengit\weixin\maConsumer\WeixinConsumer.class

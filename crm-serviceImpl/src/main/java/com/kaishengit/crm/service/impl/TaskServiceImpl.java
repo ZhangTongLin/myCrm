@@ -55,7 +55,6 @@ public class  TaskServiceImpl implements TaskService {
     @Transactional(rollbackFor = RuntimeException.class)
     public void addTask(Map<String, Object> params){
 
-
         Task task = new Task();
 
         try {
@@ -92,8 +91,18 @@ public class  TaskServiceImpl implements TaskService {
         logger.info("添加了新的任务 {}",task.getTitle());
 
         //添加新的调度任务
+        String remind = (String)params.get("remind");
+        addNewScheduler(remind, task);
 
-        if (StringUtils.isNotEmpty((String)params.get("remind"))) {
+    }
+
+    /**
+     * 添加新的调度任务
+     * @param remind 提醒时间
+     * @param task
+     */
+    private void addNewScheduler(String remind, Task task) {
+        if (StringUtils.isNotEmpty(remind)) {
 
             JobDataMap jobDataMap = new JobDataMap();
             jobDataMap.putAsString("staffId",task.getStaffId());
@@ -106,7 +115,7 @@ public class  TaskServiceImpl implements TaskService {
                     .build();
 
             DateTimeFormatter dateTimeFormatter = DateTimeFormat.forPattern("yyyy-MM-dd HH:mm");
-            DateTime dateTime = dateTimeFormatter.parseDateTime((String)params.get("remind"));
+            DateTime dateTime = dateTimeFormatter.parseDateTime(remind);
 
             StringBuilder cronExpression = new StringBuilder("0")
                     .append(" ")
@@ -133,10 +142,9 @@ public class  TaskServiceImpl implements TaskService {
                 throw new ServiceException("添加定时任务异常");
             }
 
-
         }
-
     }
+
 
     /**
      * 查找当前用户的所有待办事项
@@ -163,21 +171,20 @@ public class  TaskServiceImpl implements TaskService {
     public void deleteTaskById(Integer id) {
 
         Task task = findTaskById(id);
-        deleteTimedTask(id, task);
+        deleteTimedTask(task);
         taskMapper.deleteByPrimaryKey(id);
 
     }
 
     /**
      * 删除定时任务
-     * @param id
      * @param task
      */
-    private void deleteTimedTask(Integer id, Task task) {
+    private void deleteTimedTask(Task task) {
         Scheduler scheduler = schedulerFactoryBean.getScheduler();
         if (task.getRemindTime() != null && !task.getRemindTime().equals("")) {
             try {
-                scheduler.deleteJob(new JobKey("taskId" +id,"sendMessage"));
+                scheduler.deleteJob(new JobKey("taskId" +task.getId(),"sendMessage"));
             } catch (SchedulerException e) {
                 throw new ServiceException("删除定时任务异常");
             }
@@ -205,7 +212,7 @@ public class  TaskServiceImpl implements TaskService {
     public void updateTask(Integer id) {
         Task task = findTaskById(id);
         task.setDone(DONE);
-        deleteTimedTask(id,task);
+        deleteTimedTask(task);
         taskMapper.updateByPrimaryKeySelective(task);
     }
 
@@ -233,5 +240,89 @@ public class  TaskServiceImpl implements TaskService {
         TaskExample taskExample = new TaskExample();
         taskExample.createCriteria().andCustIdEqualTo(id);
         return taskMapper.selectByExample(taskExample);
+    }
+
+    /**
+     * 更新待办事项
+     *
+     * @param params
+     */
+    @Override
+    @Transactional(rollbackFor = RuntimeException.class)
+    public void editTask(Map<String, Object> params) {
+
+        Integer taskId = (Integer) params.get("taskId");
+        Task task = findTaskById(taskId);
+        //删除原有的定时任务
+        deleteTimedTask(task);
+
+        //更新数据库，并添加新的定时任务
+        try {
+            SimpleDateFormat finishSimpleDateFormat = new SimpleDateFormat("yyyy-MM-dd");
+            Date finishTime = finishSimpleDateFormat.parse((String) params.get("finish"));
+
+            task.setTitle((String) params.get("title"));
+            task.setFinishTime(finishTime);
+            if (params.get("remind") != null) {
+
+                SimpleDateFormat remindSimpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm");
+                Date remindTime = null;
+
+                remindTime = remindSimpleDateFormat.parse((String) params.get("remind"));
+
+                task.setRemindTime(remindTime);
+
+            }
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
+
+        taskMapper.updateByPrimaryKeySelective(task);
+
+        //添加新的调度任务
+        String remind = (String) params.get("remind");
+
+        addNewScheduler(remind,task);
+    }
+
+    /**
+     * 根据客户id删除对应的待办事项
+     *
+     * @param id
+     */
+    @Override
+    @Transactional(rollbackFor = RuntimeException.class)
+    public void deleteTaskByCustomerId(Integer id) {
+
+        List<Task> taskList = findAllTaskByCustomerId(id);
+
+        if (!taskList.isEmpty()) {
+            for (Task task : taskList) {
+                deleteTimedTask(task);
+            }
+        }
+        TaskExample taskExample = new TaskExample();
+        taskExample.createCriteria().andCustIdEqualTo(id);
+        taskMapper.deleteByExample(taskExample);
+    }
+
+    /**
+     * 根据销售机会id删除对应的待办事项
+     *
+     * @param id
+     */
+    @Override
+    public void deleteTaskByRecordId(Integer id) {
+        TaskExample taskExample = new TaskExample();
+        taskExample.createCriteria().andRecordIdEqualTo(id);
+        List<Task> taskList = taskMapper.selectByExample(taskExample);
+
+        if (taskList != null && !taskList.isEmpty()) {
+            for (Task task : taskList) {
+                deleteTimedTask(task);
+                taskMapper.deleteByPrimaryKey(task.getId());
+            }
+        }
+
     }
 }

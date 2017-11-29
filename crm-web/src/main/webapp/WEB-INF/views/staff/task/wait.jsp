@@ -50,7 +50,7 @@
                                 <span class="text">${task.title}</span>
                                 <small class="label ${task.overdue ? 'label-success':'label-danger'}"><i class="fa fa-clock-o"></i><fmt:formatDate value="${task.finishTime}" pattern="yyyy年MM月dd日"/></small>
                                 <div class="tools">
-                                    <i class="fa fa-edit"></i>
+                                    <i class="fa fa-edit editTask" rel="${task.id}"></i>
                                     <i class="fa fa-trash-o deleteTask" rel="${task.id}"></i>
                                 </div>
                             </li>
@@ -60,7 +60,6 @@
                 <!-- /.box-body -->
             </div>
             <!-- /.box -->
-
         </section>
         <!-- /.content -->
     </div>
@@ -72,6 +71,11 @@
 <script src="/static/plugins/layer/layer.js"></script>
 
 <script>
+    //修改
+    $(".editTask").click(function () {
+       var id = $(this).attr("rel");
+       window.location.href="/task/edit/"+id;
+    });
     //删除
     $(function () {
        $(".deleteTask").click(function () {
@@ -80,6 +84,7 @@
                 window.location.href="/task/" + id +"/delete";
            });
        });
+       //标记为已做
        $(".task_checkbox").click(function () {
            var id = $(this).val();
            var checked = $(this)[0].checked;

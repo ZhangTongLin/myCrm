@@ -70,15 +70,15 @@ public class TaskController extends BaseController {
                           @RequestParam(required = false) String remind,
                           RedirectAttributes redirectAttributes,
                           HttpSession session,
+                          Integer staffId,
                           @RequestParam(required = false) Integer recordId,
                           @RequestParam(required = false) Integer custId){
 
         Map<String,Object> params = new HashMap<>();
-        Staff staff = getCurrentAccount(session);
 
         params.put("title",title);
         params.put("finish",finish);
-        params.put("staffId",staff.getId());
+        params.put("staffId",staffId);
         params.put("recordId",recordId);
         params.put("custId",custId);
         params.put("remind",remind);
@@ -89,6 +89,13 @@ public class TaskController extends BaseController {
         return "redirect:/task/wait";
     }
 
+    /**
+     * 删除待办事务
+     * @param id
+     * @param redirectAttributes
+     * @param session
+     * @return
+     */
     @GetMapping("/{id:\\d+}/delete")
     public String deleteTask(@PathVariable Integer id,
                              RedirectAttributes redirectAttributes,
@@ -103,6 +110,12 @@ public class TaskController extends BaseController {
 
     }
 
+    /**
+     * 标记为已做的事务
+     * @param id
+     * @param session
+     * @return
+     */
     @GetMapping("/{id:\\d+}/done")
     public String updateTaskDone(@PathVariable Integer id,
                                  HttpSession session) {
@@ -111,12 +124,60 @@ public class TaskController extends BaseController {
         taskService.updateTask(id);
         return "redirect:/task/wait";
     }
+
+    /**
+     * 跳转修改待办事项页面
+     * @param id
+     * @param model
+     * @param session
+     * @return
+     */
+    @GetMapping("/edit/{id:\\d+}")
+    public String editTask(@PathVariable Integer id,
+                           Model model,
+                           HttpSession session) {
+
+        Task task = checkRole(id, session);
+        model.addAttribute("task",task);
+        return "/staff/task/edit";
+    }
+
+    /**
+     * 更新待办事项
+     * @param title
+     * @param finish
+     * @param remind
+     * @param redirectAttributes
+     * @param session
+     * @return
+     */
+    @PostMapping("/edit/{id:\\d+}")
+    public String editTask(String title,
+                           String finish,
+                           @RequestParam(required = false) String remind,
+                           RedirectAttributes redirectAttributes,
+                           HttpSession session,
+                           @PathVariable Integer id) {
+
+        Map<String,Object> params = new HashMap<>();
+
+        params.put("title",title);
+        params.put("finish",finish);
+        params.put("taskId",id);
+        params.put("remind",remind);
+
+        taskService.editTask(params);
+
+        redirectAttributes.addFlashAttribute("message","修改成功");
+        return "redirect:/task/wait";
+
+    }
     /**
      * 权限验证
      * @param id
      * @param session
      */
-    private void checkRole(@PathVariable Integer id, HttpSession session) {
+    private Task checkRole(@PathVariable Integer id, HttpSession session) {
         Task task = taskService.findTaskById(id);
 
         Staff staff = getCurrentAccount(session);
@@ -128,6 +189,7 @@ public class TaskController extends BaseController {
         if (!task.getStaffId().equals(staff.getId())) {
             throw new ForbidException();
         }
+        return task;
     }
 
 }

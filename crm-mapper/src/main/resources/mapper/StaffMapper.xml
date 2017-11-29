@@ -233,6 +233,15 @@
     GROUP BY
         progress
     </select>
+    <select id="findAllDeptByStaffId" resultType="com.kaishengit.crm.entity.Department">
+      SELECT
+          *
+      FROM
+          department
+      INNER JOIN dept_staff ON dept_id = department.id
+      WHERE
+          staff_id = #{staffId}
+    </select>
     <update id="updateByExampleSelective" parameterType="map">
     update staff
     <set>

@@ -64,7 +64,7 @@
                                 <tr class="chanceDetail" rel="${record.id}">
                                     <td><a href="/staff/my/record/${record.id}">${record.name}</a></td>
                                     <td><a href="/customer/my/show/${record.customer.id}">${record.customer.custName}</a></td>
-                                    <td>${record.worth}</td>
+                                    <td><fmt:formatNumber value="${record.worth}"/> </td>
                                     <td>
                                         <c:choose>
                                             <c:when test="${record.progress == '成交'}">

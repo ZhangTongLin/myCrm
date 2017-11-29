@@ -7,8 +7,6 @@ import com.kaishengit.crm.files.FileStore;
 import com.kaishengit.crm.mapper.DiskMapper;
 import com.kaishengit.crm.service.DiskService;
 import org.apache.commons.io.FileUtils;
-import org.apache.commons.io.IOUtils;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
@@ -18,7 +16,6 @@ import org.springframework.transaction.annotation.Transactional;
 import java.io.*;
 import java.util.Date;
 import java.util.List;
-import java.util.UUID;
 
 /**
  * 公司网盘的业务层
@@ -145,5 +142,44 @@ public class DiskServiceImpl implements DiskService {
         InputStream inputStream = new ByteArrayInputStream(bytes);
 
         return inputStream;
+    }
+
+    /**
+     * 根据文件的id删除文件
+     *
+     * @param id
+     * @throws ServiceException
+     */
+    @Override
+    public void deleteFileById(Integer id) throws ServiceException {
+        Disk disk = diskMapper.selectByPrimaryKey(id);
+        if (disk == null) {
+            throw new ServiceException("文件不存在或者已被删除");
+        }
+        if (Disk.DISK_TYPE_FILE.equals(disk.getType())) {
+            diskMapper.deleteByPrimaryKey(id);
+        }
+        if (Disk.DISK_TYPE_FOLDER.equals(disk.getType())) {
+            DiskExample diskExample = new DiskExample();
+            diskExample.createCriteria().andPIdEqualTo(id);
+            List<Disk> diskList = diskMapper.selectByExample(diskExample);
+            if (!diskList.isEmpty()) {
+                throw new ServiceException("该文件夹下有文件或者文件夹，不能删除");
+            }
+            diskMapper.deleteByPrimaryKey(id);
+        }
+    }
+
+    /**
+     * 根据文件的id对文件进行重命名操作
+     *
+     * @param diskId
+     * @param name
+     */
+    @Override
+    public void renameFielById(Integer diskId, String name) {
+        Disk disk = diskMapper.selectByPrimaryKey(diskId);
+        disk.setName(name);
+        diskMapper.updateByPrimaryKeyWithBLOBs(disk);
     }
 }

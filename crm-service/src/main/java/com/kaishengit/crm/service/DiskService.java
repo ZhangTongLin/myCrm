@@ -1,8 +1,8 @@
 package com.kaishengit.crm.service;
 
 import com.kaishengit.crm.entity.Disk;
+import com.kaishengit.crm.exception.ServiceException;
 
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
@@ -50,4 +50,18 @@ public interface DiskService {
      * @return 对应 的输入流
      */
     InputStream downloadFileById(Integer id) throws IOException;
+
+    /**
+     * 根据文件的id删除文件
+     * @param id
+     * @throws ServiceException
+     */
+    void deleteFileById(Integer id) throws ServiceException;
+
+    /**
+     * 根据文件的id对文件进行重命名操作
+     * @param diskId
+     * @param name
+     */
+    void renameFielById(Integer diskId, String name);
 }

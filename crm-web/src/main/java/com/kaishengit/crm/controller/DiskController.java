@@ -2,6 +2,7 @@ package com.kaishengit.crm.controller;
 
 import com.kaishengit.crm.controller.exception.NotFoundException;
 import com.kaishengit.crm.entity.Disk;
+import com.kaishengit.crm.exception.ServiceException;
 import com.kaishengit.crm.service.DiskService;
 import com.kaishengit.result.AjaxResult;
 import org.apache.commons.io.IOUtils;
@@ -74,6 +75,14 @@ public class DiskController {
         return AjaxResult.success(diskList);
     }
 
+    /**
+     * 上传文件
+     * @param pId
+     * @param staffId
+     * @param file
+     * @return
+     * @throws IOException
+     */
     @PostMapping("/upload")
     @ResponseBody
     public AjaxResult uploadDisk(@RequestParam(defaultValue = "0",required = false) Integer pId,
@@ -100,6 +109,12 @@ public class DiskController {
 
     }
 
+    /**
+     * 下载文件
+     * @param id
+     * @param response
+     * @param fileName
+     */
     @GetMapping("/download")
     public void downloadFile(Integer id,
                              HttpServletResponse response,
@@ -125,5 +140,34 @@ public class DiskController {
         } catch (IOException e) {
             throw new NotFoundException(e,"文件没有找到");
         }
+    }
+
+    /**
+     * 删除文件
+     * @param id
+     * @return
+     */
+    @GetMapping("/delete/{id:\\d+}")
+    @ResponseBody
+    public AjaxResult deleteFile(@PathVariable Integer id) {
+
+        try {
+            diskService.deleteFileById(id);
+            return AjaxResult.success();
+        } catch (ServiceException ex) {
+            return AjaxResult.error(ex.getMessage());
+        }
+    }
+
+    /**
+     * 根据文件的id进行重命名
+     * @param diskId
+     * @return
+     */
+    @GetMapping("/rename")
+    @ResponseBody
+    public AjaxResult renameFile(Integer diskId,String name) {
+        diskService.renameFielById(diskId,name);
+        return AjaxResult.success();
     }
 }

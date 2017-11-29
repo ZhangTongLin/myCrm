@@ -115,6 +115,9 @@
                         <small><button id="showRecordModalBtn" class="btn btn-success btn-xs"><i class="fa fa-plus"></i></button></small>
                     </h4>
                     <ul class="timeline">
+                        <c:if test="${empty followRecord}">
+                            暂无跟进记录
+                        </c:if>
                         <c:forEach items="${followRecord}" var="progress">
                             <c:choose>
                                 <c:when test="${progress.content} == '将进度修改为:[成交]'}">
@@ -165,6 +168,9 @@
                             </h3>
                         </div>
                         <div class="box-body">
+                            <c:if test="${empty taskList}">
+                                暂无日程安排
+                            </c:if>
                             <c:forEach items="${taskList}" var="task">
                                 <li class="list-group-item">
                                     <a href="/task/wait" target="_blank">${task.title}</a>
@@ -176,9 +182,10 @@
                         <div class="box-header with-border">
                             <h3 class="box-title">相关资料</h3>
                         </div>
-                        <div class="box-body">
-
-                        </div>
+                        <c:if test="${empty record.customer.reminder}">
+                            暂无最新资料
+                        </c:if>
+                        ${record.customer.reminder}
                     </div>
                 </div>
             </div>

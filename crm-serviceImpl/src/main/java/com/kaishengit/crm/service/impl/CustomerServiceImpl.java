@@ -9,7 +9,6 @@ import com.kaishengit.crm.example.CustomerExample;
 import com.kaishengit.crm.example.RecordExample;
 import com.kaishengit.crm.exception.ServiceException;
 import com.kaishengit.crm.mapper.CustomerMapper;
-import com.kaishengit.crm.mapper.ProgressMapper;
 import com.kaishengit.crm.mapper.RecordMapper;
 import com.kaishengit.crm.mapper.StaffMapper;
 import com.kaishengit.crm.service.CustomerService;
@@ -28,9 +27,9 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.io.IOException;
 import java.io.OutputStream;
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 
 /**
  * 客户的业务层
@@ -283,7 +282,7 @@ public class CustomerServiceImpl implements CustomerService {
         Staff staff = staffMapper.selectByPrimaryKey(customer.getStaffId());
 
         customer.setStaffId(toStaffId);
-        customer.setReminder(customer.getReminder() + staff.getUserName() + "，转交给过来");
+        customer.setReminder(customer.getReminder() + "|" + staff.getUserName() + "，转交给过来");
 
         customerMapper.updateByPrimaryKeySelective(customer);
         RecordExample recordExample = new RecordExample();
@@ -295,6 +294,51 @@ public class CustomerServiceImpl implements CustomerService {
                 recordMapper.updateByPrimaryKeySelective(record);
             }
         }
+
+    }
+
+    /**
+     * 将对应的客户放入公海
+     *
+     * @param id
+     */
+    @Override
+    public Customer addPublicCustomer(Integer id) {
+        //修改对应的staffId
+        Customer customer = customerMapper.selectByPrimaryKey(id);
+        Staff staff = staffMapper.selectByPrimaryKey(customer.getStaffId());
+        customer.setStaffId(Customer.PUBLIC_CUSTOMER_STAFFID);
+        if (customer.getReminder() == null) {
+            customer.setReminder("");
+        }
+        customer.setReminder(customer.getReminder() + "|被" + staff.getUserName() + "放入公海");
+        customerMapper.updateByPrimaryKeySelective(customer);
+        return customer;
+    }
+
+    /**
+     * 将公海客户添加为我的客户
+     *
+     * @param id
+     * @param staff
+     */
+    @Override
+    public void customerToMy(Integer id, Staff staff) {
+        Customer customer = findCustomerById(id);
+        customer.setStaffId(staff.getId());
+        customer.setUpdateTime(new Date());
+        customer.setReminder(customer.getReminder() + "|" + staff.getUserName() + "将该客户添加为自己的客户");
+        customerMapper.updateByPrimaryKeySelective(customer);
+    }
+
+    /**
+     * 查找每月增长的客户
+     *
+     * @return
+     */
+    @Override
+    public List<Map<String, Object>> findIncreaseCustomerPerMonth() {
+        return customerMapper.countIncreaseCustomerPerMonth();
 
     }
 

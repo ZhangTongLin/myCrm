@@ -1,5 +1,6 @@
 package com.kaishengit.crm.controller;
 
+import com.kaishengit.crm.service.CustomerService;
 import com.kaishengit.crm.service.StaffService;
 import com.kaishengit.result.AjaxResult;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,6 +22,8 @@ public class ChartController {
 
     @Autowired
     private StaffService staffService;
+    @Autowired
+    private CustomerService customerService;
 
     @GetMapping
     public String toChart() {
@@ -34,5 +37,15 @@ public class ChartController {
         return AjaxResult.success(mapList);
     }
 
+    /**
+     * 获取员工每月的新增客户数量
+     * @return
+     */
+    @GetMapping("/count/increase")
+    @ResponseBody
+    public AjaxResult countIncrease() {
+        List<Map<String, Object>> resultMap = customerService.findIncreaseCustomerPerMonth();
+        return AjaxResult.success(resultMap);
+    }
 
 }

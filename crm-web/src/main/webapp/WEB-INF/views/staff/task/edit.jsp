@@ -1,3 +1,4 @@
+<%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/fmt" %>
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <!DOCTYPE html>
 <html>
@@ -33,34 +34,33 @@
             <!-- Default box -->
             <div class="box">
                 <div class="box-header with-border">
-                    <h3 class="box-title">新增待办任务</h3>
+                    <h3 class="box-title">修改待办任务</h3>
 
                     <div class="box-tools pull-right">
-                        <a href="/task/wait" type="button" class="btn btn-box-tool">
+                        <a href="/task/edit" type="button" class="btn btn-box-tool">
                             <i class="fa fa-plus"></i> 返回列表
                         </a>
                     </div>
                 </div>
                 <div class="box-body">
-                    <form action="/task/new" id="addTaskForm" method="post">
-                        <input name="staffId" value="${sessionScope.curr_account.id}" type="hidden">
+                    <form action="/task/edit/${task.id}" id="editTaskForm" method="post">
                         <div class="form-group">
                             <label>任务名称</label>
-                            <input name="title" type="text" class="form-control">
+                            <input name="title" type="text" value="${task.title}" class="form-control">
                         </div>
                         <div class="form-group">
                             <label>完成日期</label>
-                            <input name="finish" type="text" class="form-control" id="datepicker">
+                            <input name="finish" type="text" class="form-control" value="<fn:formatDate value="${task.finishTime}"/>" id="datepicker">
                         </div>
                         <div class="form-group">
                             <label>提醒时间</label>
-                            <input name="remind" type="text" class="form-control" id="datepicker2">
+                            <input name="remind" type="text" class="form-control" value="<fn:formatDate value="${task.remindTime}" pattern="yyyy-MM-dd HH:mm"/>" id="datepicker2">
                         </div>
                     </form>
                 </div>
                 <!-- /.box-body -->
                 <div class="box-footer">
-                    <button id="addTaskBtn" class="btn btn-primary">保存</button>
+                    <button id="editTaskBtn" class="btn btn-primary">确认修改</button>
                 </div>
             </div>
             <!-- /.box -->
@@ -82,10 +82,10 @@
 <script src="/static/plugins/validate/jquery.validate.min.js"></script>
 <script>
     $(function () {
-        $("#addTaskBtn").click(function () {
-            $("#addTaskForm").submit();
+        $("#editTaskBtn").click(function () {
+            $("#editTaskForm").submit();
         });
-        $("#addTaskForm").validate({
+        $("#editTaskForm").validate({
             errorClass : "text-danger",
             errorElement : "span",
             rules : {

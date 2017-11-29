@@ -2,6 +2,7 @@ package com.kaishengit.crm.mapper;
 
 import com.kaishengit.crm.entity.Customer;
 import java.util.List;
+import java.util.Map;
 
 import com.kaishengit.crm.example.CustomerExample;
 import org.apache.ibatis.annotations.Param;
@@ -28,4 +29,6 @@ public interface CustomerMapper {
     int updateByPrimaryKeySelective(Customer record);
 
     int updateByPrimaryKey(Customer record);
+
+    List<Map<String, Object>> countIncreaseCustomerPerMonth();
 }

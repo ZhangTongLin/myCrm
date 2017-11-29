@@ -2,10 +2,7 @@ package com.kaishengit.crm.service;
 
 
 import com.github.pagehelper.PageInfo;
-import com.kaishengit.crm.entity.Customer;
-import com.kaishengit.crm.entity.Progress;
-import com.kaishengit.crm.entity.Record;
-import com.kaishengit.crm.entity.Staff;
+import com.kaishengit.crm.entity.*;
 import com.kaishengit.crm.exception.ServiceException;
 import com.kaishengit.crm.exception.VerifyException;
 
@@ -17,13 +14,6 @@ import java.util.Map;
  * @author Administrator.
  */
 public interface StaffService {
-    /**
-     * 登录验证
-     * @param staffNum 手机号
-     * @param password 密码
-     * @return 验证成功返回登录对象，失败抛出异常
-     */
-    Staff verify(String staffNum, String password) throws VerifyException;
 
     /**
      * 根据条件查询员工列表
@@ -133,4 +123,25 @@ public interface StaffService {
      * @return
      */
     Staff findStaffById(Integer toStaffId);
+
+    /**
+     * 查询所有的公共客户
+     * @return
+     * @param pageNo
+     */
+    PageInfo<Customer> findAllPublicCustomer(Integer pageNo);
+
+    /**
+     * 根据手机号查询用户
+     * @param phoneNum 手机号
+     * @return
+     */
+    Staff findByPhoneNum(String phoneNum);
+
+    /**
+     * 根据账号id获取对应的部门列表
+     * @param id
+     * @return
+     */
+    List<Department> findDeptByStaffId(Integer id);
 }

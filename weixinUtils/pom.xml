@@ -44,6 +44,12 @@
             <artifactId>guava</artifactId>
             <version>23.0</version>
         </dependency>
+        <!--Active MQ-->
+        <dependency>
+            <groupId>org.apache.activemq</groupId>
+            <artifactId>activemq-all</artifactId>
+            <version>5.15.0</version>
+        </dependency>
     </dependencies>
 
 </project>

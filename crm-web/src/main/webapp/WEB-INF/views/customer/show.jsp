@@ -2,6 +2,7 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%@taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
 <%@taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions" %>
+<%@ taglib prefix="shiro" uri="http://shiro.apache.org/tags" %>
 <!DOCTYPE html>
 <html>
 <head>
@@ -41,7 +42,7 @@
                         <a href="/customer/my" class="btn btn-primary btn-sm"><i class="fa fa-arrow-left"></i> 返回列表</a>
                         <a href="/customer/my/${customer.id}/edit" class="btn bg-purple btn-sm"><i class="fa fa-pencil"></i> 编辑</a>
                         <button id="tranCustomer" class="btn bg-orange btn-sm"><i class="fa fa-exchange"></i> 转交他人</button>
-                        <button class="btn bg-maroon btn-sm"><i class="fa fa-recycle"></i> 放入公海</button>
+                        <button id="publicCustomer" class="btn bg-maroon btn-sm"><i class="fa fa-recycle"></i> 放入公海</button>
                         <a href="javascript:;" id="deleteBtn" class="btn btn-danger btn-sm"><i class="fa fa-trash-o"></i> 删除</a>
                     </div>
                 </div>
@@ -85,10 +86,17 @@
                     <div class="col-md-8">
                         <div class="box">
                             <div class="box-header with-border">
-                                <h3 class="box-title">跟进记录</h3>
+                                <h3 class="box-title">销售机会</h3>
+                                <small><button id="addRecordBtn" class="btn btn-success btn-xs">
+                                            <i class="fa fa-plus"></i>
+                                        </button>
+                                </small>
                             </div>
                             <div class="box-body">
                                 <ul class="list-group">
+                                    <c:if test="${empty recordList}">
+                                        暂无销售机会
+                                    </c:if>
                                     <c:forEach items="${recordList}" var="record">
                                         <li class="list-group-item">
                                             <a href="/staff/my/record/${record.id}" target="_blank">${record.name}</a>
@@ -106,6 +114,9 @@
                                 </h3>
                             </div>
                             <div class="box-body">
+                                <c:if test="${empty taskList}">
+                                    暂无日程安排
+                                </c:if>
                                 <c:forEach items="${taskList}" var="task">
                                     <li class="list-group-item">
                                         <a href="/task/wait" target="_blank">${task.title}</a>
@@ -118,13 +129,62 @@
                                 <h3 class="box-title">相关资料</h3>
                             </div>
                             <div class="box-body">
-
+                                <c:if test="${empty customer.reminder}">
+                                    暂无最新资料
+                                </c:if>
+                                ${customer.reminder}
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
+            <%--新增销售机会--%>
+            <div class="modal fade" id="addRecordModal">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span></button>
+                            <h4 class="modal-title">新增销售机会</h4>
+                        </div>
+                        <div class="modal-body">
+                            <form method="post" action="/staff/my/record/new" id="addRecordForm">
+                                <input value="${sessionScope.curr_account.id}" type="hidden" name="staffId"/>
+                                <div class="form-group">
+                                    <label>机会名称</label>
+                                    <input name="name" type="text" class="form-control">
+                                </div>
+                                <div class="form-group">
+                                    <label>关联客户</label>
+                                    <input type="hidden" name="custId" value="<shiro:principal property="id"/>">
+                                    <input class="form-control" value="<shiro:principal property="userName"/>" disabled>
+                                </div>
+                                <div class="form-group">
+                                    <label>机会价值</label>
+                                    <input name="worth" type="text" class="form-control">
+                                </div>
+                                <div class="form-group">
+                                    <label>当前进度</label>
+                                    <select name="progress" class="form-control">
+                                        <c:forEach items="${progressList}" var="progress">
+                                            <option value="${progress}">${progress}</option>
+                                        </c:forEach>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label>详细内容</label>
+                                    <textarea name="content" class="form-control"></textarea>
+                                </div>
+                            </form>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-default" data-dismiss="modal">取消</button>
+                            <button type="button" class="btn btn-primary" id="addRecord">添加</button>
+                        </div>
+                    </div><!-- /.modal-content -->
+                </div><!-- /.modal-dialog -->
+            </div><!-- /.modal -->
 
+            <%--新增待办事项--%>
             <div class="modal fade" id="addTaskModal">
                 <div class="modal-dialog">
                     <div class="modal-content">
@@ -202,29 +262,35 @@
 <script src="/static/plugins/datepicker/locales/bootstrap-datepicker.zh-CN.js"></script>
 
 <script>
-
-    var customerId = ${customer.id};
-
-    //转交他人
-    $("#tranCustomer").click(function () {
-       $("#chooseUserModel").modal({
-           show : true,
-           backdrop : 'static'
-       });
-    });
-    $("#saveTranBtn").click(function () {
-        var toStaffId = $("#userSelect").val();
-        var toStaffMessage = $("#userSelect option:selected").text();
-        layer.confirm("确定要转交给" + toStaffMessage + "吗？",function (index) {
-            layer.close(index);
-            window.location.href="/customer/my/" + customerId + "/tran/"+toStaffId;
-        });
-    });
-
-
-    //删除
     $(function () {
 
+        var customerId = ${customer.id};
+
+        //放入公海
+
+        $("#publicCustomer").click(function () {
+            layer.confirm("放入公海将会丢失原有的销售记录和待办事项，确定要放入公海吗?",function () {
+                window.location.href="/customer/public/"+customerId;
+            });
+        });
+
+        //转交他人
+        $("#tranCustomer").click(function () {
+            $("#chooseUserModel").modal({
+                show : true,
+                backdrop : 'static'
+            });
+        });
+        $("#saveTranBtn").click(function () {
+            var toStaffId = $("#userSelect").val();
+            var toStaffMessage = $("#userSelect option:selected").text();
+            layer.confirm("确定要转交给" + toStaffMessage + "吗？",function (index) {
+                layer.close(index);
+                window.location.href="/customer/my/" + customerId + "/tran/"+toStaffId;
+            });
+        });
+
+        //删除
         $("#deleteBtn").click(function () {
             layer.confirm("确定要删除吗？",function (index) {
                 layer.close(index);
@@ -283,6 +349,49 @@
             language: "zh-CN",
             autoclose: true,
             todayHighlight: true
+        });
+
+        //新增销售机会
+        $("#addRecordBtn").click(function () {
+            $("#addRecordModal").modal({
+                show : true,
+                backdrop : 'static'
+            });
+        });
+
+        $("#addRecord").click(function () {
+           $("#addRecordForm").submit();
+        });
+
+        $("#addRecordForm").validate({
+            errorClass : "text-danger",
+            errorElement : "span",
+            rules : {
+                name : {
+                    required : true
+                },
+                worth : {
+                    required : true,
+                    number : true,
+                    min : 1
+                },
+                progress : {
+                    required : true
+                }
+            },
+            messages : {
+                name : {
+                    required : "请输入机会名称"
+                },
+                worth : {
+                    required : "请输入正确的价值金额",
+                    number : "请输入正确的价值金额",
+                    min : "请输入正确的价值金额"
+                },
+                progress : {
+                    required : "请选择当前进度"
+                }
+            }
         });
 
     });

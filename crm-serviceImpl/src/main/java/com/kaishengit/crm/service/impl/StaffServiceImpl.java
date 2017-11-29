@@ -49,25 +49,7 @@ public class StaffServiceImpl implements StaffService {
     private Logger logger = LoggerFactory.getLogger(StaffServiceImpl.class);
     private static final Integer COMPANY_ID = 1;
 
-    /**
-     * 登录验证
-     * @param staffNum 手机号
-     * @param password 密码
-     * @return 验证成功返回登录对象，失败抛出VerifyException异常
-     */
-    @Override
-    public Staff verify(String staffNum, String password) throws VerifyException {
 
-        password = DigestUtils.md5Hex(password + salt);
-        Staff staff=  staffMapper.verify(staffNum,password);
-        if (staff != null) {
-            logger.info("{} 在 {} 登录",staff.getUserName(),new Date());
-            return staff;
-        } else {
-            throw new VerifyException("账号或者密码错误");
-        }
-
-    }
 
     /**
      * 根据条件查询员工列表
@@ -226,7 +208,7 @@ public class StaffServiceImpl implements StaffService {
      * @param record
      */
     @Override
-    @Transactional
+    @Transactional(rollbackFor = RuntimeException.class)
     public void addRecord(Record record) {
 
         record.setCreateTime(new Date());
@@ -294,7 +276,7 @@ public class StaffServiceImpl implements StaffService {
      * @param progress
      */
     @Override
-    @Transactional
+    @Transactional(rollbackFor = RuntimeException.class)
     public void insertProgress(Progress progress) {
 
         progress.setCreateTime(new Date());
@@ -363,5 +345,52 @@ public class StaffServiceImpl implements StaffService {
     @Override
     public Staff findStaffById(Integer toStaffId) {
         return staffMapper.selectByPrimaryKey(toStaffId);
+    }
+
+    /**
+     * 查询所有的公共客户
+     *
+     * @return
+     * @param pageNo
+     */
+    @Override
+    public PageInfo<Customer> findAllPublicCustomer(Integer pageNo) {
+
+        PageHelper.startPage(pageNo,5);
+
+        CustomerExample customerExample = new CustomerExample();
+        customerExample.createCriteria().andStaffIdEqualTo(Customer.PUBLIC_CUSTOMER_STAFFID);
+        List<Customer> publicCustomerList = customerMapper.selectByExample(customerExample);
+
+        return new PageInfo<>(publicCustomerList);
+    }
+
+    /**
+     * 根据手机号查询用户
+     *
+     * @param phoneNum 手机号
+     * @return
+     */
+    @Override
+    public Staff findByPhoneNum(String phoneNum) {
+        StaffExample staffExample = new StaffExample();
+        staffExample.createCriteria().andPhoneNumEqualTo(phoneNum);
+        List<Staff> staffList = staffMapper.selectByExample(staffExample);
+
+        if (staffList != null && !staffList.isEmpty()) {
+            return staffList.get(0);
+        }
+        return null;
+    }
+
+    /**
+     * 根据账号id获取对应的部门列表
+     *
+     * @param id
+     * @return
+     */
+    @Override
+    public List<Department> findDeptByStaffId(Integer id) {
+        return staffMapper.findAllDeptByStaffId(id);
     }
 }

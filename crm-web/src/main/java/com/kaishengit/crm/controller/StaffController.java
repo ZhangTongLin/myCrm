@@ -177,6 +177,12 @@ public class StaffController extends BaseController {
         return "redirect:/staff/my//record/"+ id;
     }
 
+    /**
+     * 跟新销售机会进度
+     * @param progress
+     * @param session
+     * @return
+     */
     @PostMapping("/my/record/progress/update")
     public String updateMyRecordFollowProgress(Progress progress,
                                                HttpSession session) {

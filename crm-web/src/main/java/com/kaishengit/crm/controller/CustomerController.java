@@ -14,6 +14,7 @@ import com.kaishengit.crm.service.TaskService;
 import com.kaishengit.result.AjaxResult;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
@@ -24,6 +25,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * @author Administrator.
@@ -59,12 +61,90 @@ public class CustomerController extends BaseController {
     }
 
     /**
-     * 公海客户
+     * 跳转公海客户页面
+     * @param pageNo
+     * @param model
      * @return
      */
     @GetMapping("/public")
-    public String publicCustomerList() {
+    public String publicCustomerList(@RequestParam(defaultValue = "1",name = "p",required = false) Integer pageNo,
+                                     Model model) {
+        PageInfo<Customer> pageInfo = staffService.findAllPublicCustomer(pageNo);
+        model.addAttribute("pageInfo",pageInfo);
         return "customer/public";
+    }
+
+    /**
+     * 将客户放入公海
+     * @param id
+     * @param redirectAttributes
+     * @return
+     */
+    @GetMapping("/public/{id:\\d+}")
+    public String addPublicCustomer(@PathVariable Integer id,
+                                    RedirectAttributes redirectAttributes) {
+
+
+        deleteTaskAndRecordByCustomerId(id);
+
+        //放入公海
+        Customer customer = customerService.addPublicCustomer(id);
+
+        redirectAttributes.addFlashAttribute("message","以成功将" + customer.getCustName() + "放入公海");
+        return "redirect:/customer/my";
+    }
+
+    /**
+     * 显示公海客户详情
+     * @param id
+     * @param model
+     * @return
+     */
+    @GetMapping("/public/show/{id:\\d+}")
+    public String showPublicCustomer(@PathVariable Integer id,
+                                     Model model) {
+
+        Customer customer = customerService.findCustomerById(id);
+        model.addAttribute("customer",customer);
+        return "customer/publicShow";
+    }
+
+    /**
+     * 将公海客户添加至我的客户
+     * @param id
+     * @param redirectAttributes
+     * @return
+     */
+    @GetMapping("/public/{id:\\d+}/my")
+    public String addPublicCustomerToMy(@PathVariable Integer id,
+                                        RedirectAttributes redirectAttributes) {
+
+
+        Staff staff = getCurrentStaff();
+        customerService.customerToMy(id,staff);
+
+        redirectAttributes.addFlashAttribute("message","恭喜您收入一个新客户");
+        return "redirect:/customer/my";
+    }
+
+    /**
+     * 根据顾客id删除对应的待办事项和销售机会
+     * @param id
+     */
+    @Transactional(rollbackFor = RuntimeException.class)
+    private void deleteTaskAndRecordByCustomerId(@PathVariable Integer id) {
+
+        //删除待办，根据客户id
+        taskService.deleteTaskByCustomerId(id);
+
+        List<Record> recordList = customerService.findAllRecord(id);
+
+        for (Record record : recordList) {
+            //删除待办事项，根据销售机会id
+            taskService.deleteTaskByRecordId(record.getId());
+            //删除销售机会
+            staffService.deleteRecordById(record.getId());
+        }
     }
 
     /**
@@ -76,7 +156,6 @@ public class CustomerController extends BaseController {
 
         model.addAttribute("sources", customerService.findAllSource());
         model.addAttribute("trades",customerService.findAllTrade());
-
 
         return "customer/new";
     }
@@ -129,9 +208,10 @@ public class CustomerController extends BaseController {
         //待办事项列表
         List<Task> taskList = taskService.findAllTaskByCustomerId(id);
 
-        //所有用户的列表
+        //所有用户的列表 用于转交他人
         List<Staff> staffList = staffService.findAllStaff();
 
+        model.addAttribute("progressList",staffService.findAllProgress());
         model.addAttribute("staffList",staffList);
         model.addAttribute("taskList",taskList);
         model.addAttribute("recordList",recordList);

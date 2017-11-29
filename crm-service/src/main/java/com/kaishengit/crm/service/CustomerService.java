@@ -9,6 +9,7 @@ import com.kaishengit.crm.exception.ServiceException;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.List;
+import java.util.Map;
 
 /**
  * 客户的业务层
@@ -96,4 +97,23 @@ public interface CustomerService {
      * @param customer
      */
     void tranCustomerToStaff(Integer toStaffId, Customer customer);
+
+    /**
+     * 将对应的客户放入公海
+     * @param id
+     */
+    Customer addPublicCustomer(Integer id);
+
+    /**
+     * 将公海客户添加为我的客户
+     * @param id
+     * @param staff
+     */
+    void customerToMy(Integer id, Staff staff);
+
+    /**
+     * 查找每月增长的客户
+     * @return
+     */
+    List<Map<String, Object>> findIncreaseCustomerPerMonth();
 }

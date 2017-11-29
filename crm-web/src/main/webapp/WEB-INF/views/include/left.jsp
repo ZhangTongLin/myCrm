@@ -1,5 +1,6 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%@taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions" %>
+<%@ taglib prefix="shiro" uri="http://shiro.apache.org/tags" %>
 
 <!-- 左侧菜单栏 -->
 <aside class="main-sidebar">
@@ -36,16 +37,10 @@
             </li>
             <!-- 销售机会 -->
             <li class="treeview ${fn:startsWith(param.menu,'record_') ? 'active':''}">
-                <a href="#">
-                    <i class="fa fa-bars"></i> <span>销售机会</span>
-                    <span class="pull-right-container">
-              <i class="fa fa-angle-left pull-right"></i>
-            </span>
+                <a href="/staff/my/record" >
+                    <i class="fa fa-bars"></i>
+                    我的销售机会
                 </a>
-                <ul class="treeview-menu">
-                    <li class="${param.menu == 'record_my' ? 'active':''}"><a href="/staff/my/record" ><i class="fa fa-circle-o"></i> 我的销售机会</a></li>
-                    <li class="${param.menu == 'record_public' ? 'active':''}"><a href="/staff/public/record"><i class="fa fa-circle-o"></i> 公共机会</a></li>
-                </ul>
             </li>
             <!-- 待办事项 -->
             <li class="treeview ${param.menu == 'log_wait' ? 'active' : ''}">
@@ -60,9 +55,15 @@
                 </a>
             </li>
             <li class="${param.menu == 'disk' ? 'active':''}"><a href="/disk"><i class="fa fa-share-alt"></i> <span>公司网盘</span></a></li>
-            <li class="header">系统管理</li>
-            <!-- 部门员工管理 -->
-            <li class="${param.menu == 'admin'?'active':''}"><a href="/admin/staffManage"><i class="fa fa-users"></i> <span>员工管理</span></a></li>
+            <shiro:hasRole name="管理部">
+                <li class="header">系统管理</li>
+                <!-- 部门员工管理 -->
+                <li class="${param.menu == 'admin'?'active':''}">
+                    <a href="/admin/staffManage">
+                        <i class="fa fa-users"></i> <span>员工管理</span>
+                    </a>
+                </li>
+            </shiro:hasRole>
             <!--<li><a href="#"><i class="fa fa-circle-o text-yellow"></i> <span>Warning</span></a></li>
             <li><a href="#"><i class="fa fa-circle-o text-aqua"></i> <span>Information</span></a></li>-->
         </ul>

@@ -48,7 +48,6 @@
 
     <!-- Main content -->
     <section class="content">
-
       <!-- Default box -->
       <div class="box">
         <div class="box-header with-border">
@@ -120,7 +119,7 @@
                       <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown">
                         <i class="fa fa-ellipsis-h"></i>
                       </button>
-                      <ul id="handle" class="dropdown-menu">
+                      <ul class="dropdown-menu">
                           <c:choose>
                               <c:when test="${disk.type == 'file'}">
                                   <li><a href="/disk/download?id=${disk.id}&fileName=${disk.name}">下载</a></li>
@@ -130,8 +129,8 @@
                                   <li><a href="/disk?id=${disk.id}">打开</a></li>
                               </c:otherwise>
                           </c:choose>
-                        <li value="重命名"><a>重命名</a></li>
-                        <li value="删除"><a>删除</a></li>
+                        <li rel="${disk.id}" class="rename"><a>重命名</a></li>
+                        <li rel="${disk.id}" class="delete"><a>删除</a></li>
                       </ul>
                     </div>
                   </td>
@@ -307,19 +306,42 @@
       });
 
       //删除文件
-      
-//      $("#handle").change(function () {
-//          var value = $("#handle").val();
-//          alert(value);
-//          if (value == "删除") {
-//              alert(123)
-//          }
-//      })
-//      $(".test").click(function () {
-//         layer.confirm("确定要删除吗",function () {
-//
-//         });
-//      });
+
+      $(".delete").click(function (e) {
+          e.stopPropagation();
+          var diskId = $(this).attr("rel")
+          layer.confirm("确定要删除吗？",function () {
+             $.get("/disk/delete/" + diskId).done(function (json) {
+                 if (json.state == "success") {
+                     layer.msg("删除成功");
+                     window.history.go(0);
+                 } else {
+                     layer.msg(json.message);
+                 }
+             }).error(function () {
+                 layer.msg("系统异常，请稍后再试");
+             });
+          });
+      });
+      //重命名
+      $(".rename").click(function (e) {
+          e.stopPropagation();
+          var diskId = $(this).attr("rel");
+          layer.prompt({title : "请输入新的名称"},function (text) {
+              $.get("/disk/rename",{"diskId" : diskId,"name" : text}).done(function (json) {
+
+                  if (json.state == "success") {
+                    layer.msg("修改成功");
+                    window.history.go(0);
+                  } else {
+                      layer.msg("修改失败");
+                  }
+
+              }).error(function () {
+                  layer.msg("系统异常，请杀后再试");
+              });
+          });
+      });
   });
 </script>
 </body>
